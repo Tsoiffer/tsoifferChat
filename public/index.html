@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TSoifferChat</title>
+
+
+
+    <style media="screen">
+      .redondo{
+        border-radius: 50%;
+        width: 200px;
+      }
+      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+      #message { background: white; max-width: 700px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; text-align: center; }
+      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
+      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
+      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+      @media (max-width: 600px) {
+        body, #message { margin-top: 0; background: white; box-shadow: none; }
+        body { border-top: 16px solid #ffa100; }
+      }
+      li{
+        display: flex;
+        align-content: center;
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+      li sub{
+        margin-left: 10px;
+      }
+      #mensajes{
+        float: left;
+        text-align: left;
+        width: 90%;
+        max-height: 300px;
+        overflow: auto;
+      }
+      #mensajes img{
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+      }
+      #mensajes p{
+        display: inline-block;
+        margin-left: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="message">
+      <img src="./imagenes/img-logout.png" alt="" class="redondo" id="pic">
+      <h2 id="name">Hola</h2>
+      <h1>El chat de tsoiffer</h1>
+      <p id="email">Que esperas para registrarte!</p>
+      <a target="_blank" id="login" >Entrar en chat</a>
+      <a target="_blank" id="logout" style="display: none;" >Salir de chat</a>
+      <div id="mensajescontainer" style="display: none;">
+        <ul id="mensajes">
+          
+        </ul>
+        <div style="text-align: center; display: none;" id="cargando"><strong>Cargando...</strong></div>
+        <input type="text" id="mensaje">
+        <button id="pushMensaje">Enviar mensaje</button>
+      </div>
+    </div>
+   
+    <p id="load">Firebase SDK Loading&hellip;</p>
+
+
+  <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase.js"></script>
+
+  <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+  <!-- <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase-analytics.js"></script> -->
+
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase-firestore.js"></script>
+  
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyDjp5LHilmkHnVosXF23VmpKvakj_wj-WU",
+        authDomain: "tsoifferchat.firebaseapp.com",
+        projectId: "tsoifferchat",
+        storageBucket: "tsoifferchat.appspot.com",
+        messagingSenderId: "427600443169",
+        appId: "1:427600443169:web:712b4b9fd944938177f060",
+        measurementId: "G-PNVBY7ELZW"
+      };
+      firebase.initializeApp(firebaseConfig);
+
+      let btt = document.getElementById("login")
+      let off = document.getElementById("logout")
+      let pic = document.getElementById("pic")
+      let name = document.getElementById("name")
+      let email = document.getElementById("email")
+      let mensajescontainer = document.getElementById("mensajescontainer")
+      let mensajes = document.getElementById("mensajes")
+      let mensaje = document.getElementById("mensaje")
+      let pushMensaje = document.getElementById("pushMensaje")
+      let cargando = document.getElementById("cargando")
+
+      pushMensaje.addEventListener("click", (e)=> {
+        guardarMensaje()
+      })
+      document.addEventListener("keydown", (e)=> {
+        if(e.key === 'Enter' ){
+        if(mensaje.value){
+        guardarMensaje()}
+      }
+      })
+
+      off.addEventListener("click", (e)=> {
+        desLogear()
+      })
+
+      btt.addEventListener("click", (e)=> {
+        logearConGoogle()
+        
+      })
+
+      let usuario = {}
+
+      function logearConGoogle(){
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider).then(result=> 
+        {console.log("logueo: ",result.user.email), usuario = result, console.log(usuario)}).catch(error=> console.log(error.message))
+        
+        
+      }
+
+      function desLogear(){
+        firebase.auth().signOut().then(function(){
+          console.log("nos desolgueamos")
+        }).catch(function(err){
+          console.log(err, "errore loco")
+        })
+        btt.style.display = "block"
+        
+        mensajescontainer.style.display = "none"
+        name.innerHTML =  "Hola"
+        pic.src = "./imagenes/img-logout.png"
+        email.innerHTML = "El mejor chat de toda la truchiRed!"
+        mensajes.innerHTML = ""
+        off.style.display = "none"
+      }
+
+      function logearUsuario(){ //Antes se logueaba dos veces el usuario, uno cuando logueaba y otra vez cuando preguntaba si habia alguien logueado, borre las del cuando se logea y deje un console log
+        
+        console.log(usuario)
+        btt.style.display = "none"
+        off.style.display = "block"
+        mensajescontainer.style.display = "block"
+        name.innerHTML =  usuario.user.displayName
+        pic.src = usuario.user.photoURL
+        email.innerHTML = usuario.user.email
+        mensajes.innerHTML = ""
+        mostrame()
+
+          
+      }
+
+      document.addEventListener("DOMContentLoaded", ()=>{
+        firebase.auth().onAuthStateChanged(user=>{
+          if(user){
+            usuario = {"user":user}
+            logearUsuario()
+          }
+        })
+      })
+
+      function guardarMensaje(){
+        let ahora = new Date()
+        let fecha = ahora.getDate()+"-"+(ahora.getMonth()+1)+"-"+ahora.getFullYear()
+        let hora = ahora.getHours()+":"+ahora.getMinutes()
+        console.log(fecha)
+        console.log(hora)
+        fecha
+        const record = {
+          avatar: usuario.user.photoURL,
+          nombre: usuario.user.displayName,
+          txt: mensaje.value,
+          date: fecha+" "+hora
+        }
+        const db = firebase.database()
+        const dbRef = db.ref("mensajes")
+        const newMensaje = dbRef.push()
+        newMensaje.set(record)
+        mensaje.value = ""
+      }
+      function mostrame(){
+
+        mensajes.innerHTML = ""
+        cargando.style.display = "block"
+        const db = firebase.database()
+        const dbRef = db.ref("mensajes")
+        dbRef.on("child_added", snapshot =>{
+          console.log(snapshot.val())
+          setTimeout( () =>{
+          
+          var item = document.createElement("li")
+          
+          var fotoUsuario = document.createElement("img")
+          fotoUsuario.src = snapshot.val().avatar
+          item.appendChild(fotoUsuario)
+          item.innerHTML += "<p>"+"<strong>"+snapshot.val().nombre+"</strong>: "+snapshot.val().txt+"<sub><strong><small>"+snapshot.val().date+"</small></strong></sub>"+"</p> "
+          mensajes.appendChild(item)
+          let items = document.querySelectorAll("li")
+          let last = items[items.length-1]
+          last.scrollIntoView()}
+          , 500)
+          return new Promise(function(resolve, reject) {
+            resolve("bien!")
+            
+          }).then(() => {
+            cargando.style.display = "none"
+            console.log("ya resolvimos todo")
+          })
+        })
+      }
+
+    </script>
+  </body>
+</html>
